@@ -1,6 +1,4 @@
 <?php
-
-<?php
 // backend/server.php
 // Run: php server.php
 
