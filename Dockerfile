@@ -1,10 +1,24 @@
-FROM php:8.2-apache
+# Use official PHP image with Composer
+FROM php:8.2-cli
 
-# Copy source code to /var/www/html
-COPY . /var/www/html/
+# Install needed extensions
+RUN apt-get update && apt-get install -y \
+    libzip-dev zip unzip git \
+    && docker-php-ext-install pcntl
 
-# Install dependencies if needed
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+# Set working directory
+WORKDIR /app
 
-# Expose port (default for Apache)
-EXPOSE 80
+# Copy project files
+COPY . .
+
+# Install composer dependencies
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && composer install --no-dev
+
+# Expose port for websocket
+EXPOSE 8080
+
+# Command to start Ratchet server
+CMD ["php", "server.php"]
